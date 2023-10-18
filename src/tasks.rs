@@ -27,7 +27,8 @@ impl Task {
 impl fmt::Display for Task {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let creation_date = self.creation_date.with_timezone(&Local).format("%F %H:%M");
-        write!(f, "{:<30} | {}", self.title, creation_date)
+        // Format the task as a string of length 25 on left followed by the creation date.
+        write!(f, "{:<25} | {}", self.title, creation_date)
     }
 }
 
@@ -86,6 +87,7 @@ pub fn remove_task(file_name: PathBuf, task_number: usize) -> Result<()> {
     };
 
     // Write the updated tasks list to the file.
+    file.set_len(0)?;
     serde_json::to_writer_pretty(file, &tasks_list)?;
     Ok(())
 }
