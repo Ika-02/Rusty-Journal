@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::io::{Result, Seek, SeekFrom, Error, ErrorKind};
 use std::path::PathBuf;
 use std::fs::{File, OpenOptions};
+use std::fmt;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -20,6 +21,13 @@ impl Task {
             title,
             creation_date: Utc::now(),
         }
+    }
+}
+
+impl fmt::Display for Task {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let creation_date = self.creation_date.with_timezone(&Local).format("%F %H:%M");
+        write!(f, "{:<30} | {}", self.title, creation_date)
     }
 }
 
@@ -59,7 +67,7 @@ pub fn add_task(file_name: PathBuf, task: Task) -> Result<()> {
 }
 
 
-pub fn complete_task(file_name: PathBuf, task_number: usize) -> Result<()> {
+pub fn remove_task(file_name: PathBuf, task_number: usize) -> Result<()> {
     // Open the file in read-write mode, creating it if it doesn't exist already.
     let mut file = OpenOptions::new()
         .read(true)
@@ -83,5 +91,22 @@ pub fn complete_task(file_name: PathBuf, task_number: usize) -> Result<()> {
 }
 
 
+pub fn list_tasks(file_name: PathBuf) -> Result<()> {
+    // Open file in read-only mode.
+    let file = OpenOptions::new()
+        .read(true)
+        .open(file_name)?;
 
-pub fn list_tasks(file_name: PathBuf) -> Result<()> {}
+    // Read the file and parse the tasks list into a vector.
+    let tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;
+
+    if tasks_list.is_empty() { // If the tasks list is empty, print a message.
+        println!("No tasks in the list.");
+    } else {
+        // Loop through the tasks list and print each task.
+        for (i, task) in tasks_list.iter().enumerate() {
+            println!("[{}] {}", i + 1, task);
+        }
+    }
+    Ok(())
+}
