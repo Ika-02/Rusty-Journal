@@ -7,7 +7,7 @@ pub enum Action {
     /// Add a new task to the list
     Add { 
         #[structopt()]
-        task: String 
+        title: String 
     },
     /// Remove an item from the list
     Remove {

@@ -1,19 +1,19 @@
 use chrono::{serde::ts_seconds, DateTime, Local, Utc};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
+use serde::Deserialize;
 use std::io::{Result, Seek, SeekFrom, Error, ErrorKind};
 use std::path::PathBuf;
 use std::fs::{File, OpenOptions};
 use std::fmt;
 
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Task {
     pub title: String,
 
     #[serde(with = "ts_seconds")]
     pub creation_date: DateTime<Utc>,
 }
-
 
 impl Task {
     pub fn new(title: String) -> Task {
@@ -37,7 +37,7 @@ fn collect_tasks_from_file(mut file: &File) -> Result<Vec<Task>> {
     file.seek(SeekFrom::Start(0))?;
 
     // Read the file and parse the tasks list into a vector.
-    let tasks_list: Vec<Task> = match serde_json::from_reader(&file) {
+    let tasks_list: Vec<Task> = match serde_json::from_reader(file) {
         Ok(tasks_list) => tasks_list,
         Err(e) if e.is_eof() => Vec::new(),
         Err(e) => Err(e)?,
@@ -50,7 +50,7 @@ fn collect_tasks_from_file(mut file: &File) -> Result<Vec<Task>> {
 
 pub fn add_task(file_name: PathBuf, task: Task) -> Result<()> {
     // Open the file in read-write mode, creating it if it doesn't exist already.
-    let mut file = OpenOptions::new()
+    let file = OpenOptions::new()
         .read(true)
         .write(true)
         .create(true)
@@ -69,7 +69,7 @@ pub fn add_task(file_name: PathBuf, task: Task) -> Result<()> {
 
 pub fn remove_task(file_name: PathBuf, task_number: usize) -> Result<()> {
     // Open the file in read-write mode, creating it if it doesn't exist already.
-    let mut file = OpenOptions::new()
+    let file = OpenOptions::new()
         .read(true)
         .write(true)
         .create(true)

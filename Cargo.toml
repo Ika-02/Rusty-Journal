@@ -7,12 +7,7 @@ edition = "2021"
 
 [dependencies]
 structopt = "0.3.26"
-serde_json = "1.0.107"
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+chrono = { version = "0.4", features = ["serde"] }
 
-[dependencies.chrono]
-feature = ["serde"]
-version = "0.4"
-
-[dependencies.serde]
-feature = ["derive"]
-version = "1.0"
