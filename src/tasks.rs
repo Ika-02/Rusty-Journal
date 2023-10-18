@@ -86,8 +86,9 @@ pub fn remove_task(file_name: PathBuf, task_number: usize) -> Result<()> {
         tasks_list.remove(task_number - 1);
     };
 
+    // Clear the file before writing to it -> or it will append to the file thus corrupting it.
+    file.set_len(0)?; 
     // Write the updated tasks list to the file.
-    file.set_len(0)?;
     serde_json::to_writer_pretty(file, &tasks_list)?;
     Ok(())
 }
