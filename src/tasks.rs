@@ -13,6 +13,8 @@ pub struct Task {
 
     #[serde(with = "ts_seconds")]
     pub creation_date: DateTime<Utc>,
+
+    pub done: bool,
 }
 
 impl Task {
@@ -20,6 +22,7 @@ impl Task {
         Task {
             title,
             creation_date: Utc::now(),
+            done: false,
         }
     }
 }
@@ -61,7 +64,8 @@ pub fn add_task(file_name: PathBuf, task: Task) -> Result<()> {
     let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;
 
     // Write the updated tasks list to the file.
-    tasks_list.push(task);
+    let still_undone_tasks = tasks_list.iter().filter(|task| !task.done).count();
+    tasks_list.insert(still_undone_tasks, task);
     serde_json::to_writer_pretty(file, &tasks_list)?;
 
     Ok(())
@@ -108,8 +112,111 @@ pub fn list_tasks(file_name: PathBuf) -> Result<()> {
     } else {
         // Loop through the tasks list and print each task.
         for (i, task) in tasks_list.iter().enumerate() {
+            if task.done {
+                println!("[{}|Done] {}", i + 1, task);
+                continue;
+            }
             println!("[{}] {}", i + 1, task);
         }
     }
+    Ok(())
+}
+
+
+pub fn complete_task(file_name: PathBuf, task_number: usize) -> Result<()> {
+    // Open the file in read-write mode, creating it if it doesn't exist already.
+    let file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open(file_name)?;
+
+    // Read the file and parse the tasks list into a vector.
+    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?; 
+
+    // Mark the task as done or return an error if the task number is out of range.
+    if task_number > tasks_list.len() || task_number == 0 {
+        return Err(Error::new(ErrorKind::InvalidInput, "Task number out of list's range"));
+    } else {
+        let mut task = tasks_list.remove(task_number - 1);
+        if task.done {
+            task.done = false;
+        } else {
+            task.done = true;
+        }
+        task.creation_date = Utc::now();
+        tasks_list.push(task);
+    };
+
+    // Clear the file before writing to it -> or it will append to the file thus corrupting it.
+    file.set_len(0)?; 
+    // Write the updated tasks list to the file.
+    serde_json::to_writer_pretty(file, &tasks_list)?;
+    Ok(())
+}
+
+
+pub fn move_task(file_name: PathBuf, task_number: usize, new_position: usize) -> Result<()> {
+    // Open the file in read-write mode, creating it if it doesn't exist already.
+    let file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open(file_name)?;
+
+    // Read the file and parse the tasks list into a vector.
+    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;    
+
+    // Move the task to the new position in the vector or return an error if the task number or new position is out of range.
+    if new_position > tasks_list.len() || new_position == 0 {
+        return Err(Error::new(ErrorKind::InvalidInput, "New position out of list's range"));
+    } else if task_number > tasks_list.len() || task_number == 0 {
+        return Err(Error::new(ErrorKind::InvalidInput, "Task number out of list's range"));
+    } else {
+        let still_undone_tasks = tasks_list.iter().filter(|task| !task.done).count();
+        if new_position <= still_undone_tasks {
+            let task = tasks_list.remove(task_number - 1);
+            tasks_list.push(task);
+            println!("New position out of undone tasks' range, moving to the end of the list.")
+        } else {
+            let task = tasks_list.remove(task_number - 1);
+            tasks_list.insert(new_position - 1, task);
+        }
+    };
+
+    // Clear the file before writing to it -> or it will append to the file thus corrupting it.
+    file.set_len(0)?; 
+    // Write the updated tasks list to the file.
+    serde_json::to_writer_pretty(file, &tasks_list)?;
+    Ok(())
+}
+
+
+pub fn modify_task(file_name: PathBuf, task_number: usize, title: String) -> Result<()> {
+    // Open the file in read-write mode, creating it if it doesn't exist already.
+    let file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open(file_name)?;
+
+    // Read the file and parse the tasks list into a vector.
+    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;  
+
+    // Return an error if the task number is out of range.
+    if task_number > tasks_list.len() || task_number == 0 {
+        return Err(Error::new(ErrorKind::InvalidInput, "Task number out of list's range"));
+    };
+    // Modify the task's title if it's not done, otherwise print an error message.
+    if !tasks_list[task_number - 1].done {
+        tasks_list[task_number - 1].title = title;
+    } else {
+        println!("Can't modify a completed task.")
+    };
+
+    // Clear the file before writing to it -> or it will append to the file thus corrupting it.
+    file.set_len(0)?; 
+    // Write the updated tasks list to the file.
+    serde_json::to_writer_pretty(file, &tasks_list)?;
     Ok(())
 }

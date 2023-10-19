@@ -9,10 +9,29 @@ pub enum Action {
         #[structopt()]
         title: String 
     },
-    /// Remove an item from the list
+    /// Mark a task as completed (or uncompleted again)
+    Complete { 
+        #[structopt()] 
+        task_number: usize 
+    },
+    /// Remove a task from the list
     Remove {
         #[structopt()] 
         task_number: usize 
+    },
+    /// Move a task to another position in the list
+    Move {
+        #[structopt()] 
+        task_number: usize,
+        #[structopt()] 
+        new_position: usize,
+    },
+    /// Modify the title of a task
+    Modify {
+        #[structopt()] 
+        task_number: usize,
+        #[structopt()] 
+        title: String,
     },
     /// List all tasks
     List,

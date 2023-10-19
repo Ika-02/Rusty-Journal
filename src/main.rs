@@ -31,7 +31,10 @@ fn main() -> anyhow::Result<()> {
     // Perform the action or print an error message.
     match action {
         Add { title } => tasks::add_task(file_name, Task::new(title)),
+        Complete { task_number } => tasks::complete_task(file_name, task_number),
         Remove { task_number } => tasks::remove_task(file_name, task_number),
+        Move { task_number, new_position } => tasks::move_task(file_name, task_number, new_position),
+        Modify { task_number, title } => tasks::modify_task(file_name, task_number, title),
         List => tasks::list_tasks(file_name),
     }.expect("Failed to perform action");
     Ok(())
