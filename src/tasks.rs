@@ -5,6 +5,7 @@ use std::io::{Result, Seek, SeekFrom, Error, ErrorKind};
 use std::path::PathBuf;
 use std::fs::{File, OpenOptions};
 use std::fmt;
+use ansi_term::Colour::Green;
 
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -113,7 +114,8 @@ pub fn list_tasks(file_name: PathBuf) -> Result<()> {
         // Loop through the tasks list and print each task.
         for (i, task) in tasks_list.iter().enumerate() {
             if task.done {
-                println!("[{}|Done] {}", i + 1, task);
+                let done_task = format!("[{}|Done] {}", i + 1, task);
+                println!("{}", Green.paint(done_task));
                 continue;
             }
             println!("[{}] {}", i + 1, task);
