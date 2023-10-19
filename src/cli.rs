@@ -5,32 +5,32 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 pub enum Action {
     /// Add a new task to the list
-    Add { 
+    Add {
         #[structopt()]
-        title: String 
+        title: String,
     },
     /// Mark a task as completed (or uncompleted again)
-    Complete { 
-        #[structopt()] 
-        task_number: usize 
+    Complete {
+        #[structopt()]
+        task_number: usize,
     },
     /// Remove a task from the list
     Remove {
-        #[structopt()] 
-        task_number: usize 
+        #[structopt()]
+        task_number: usize,
     },
     /// Move a task to another position in the list
     Move {
-        #[structopt()] 
+        #[structopt()]
         task_number: usize,
-        #[structopt()] 
+        #[structopt()]
         new_position: usize,
     },
     /// Modify the title of a task
     Modify {
-        #[structopt()] 
+        #[structopt()]
         task_number: usize,
-        #[structopt()] 
+        #[structopt()]
         title: String,
     },
     /// List all tasks

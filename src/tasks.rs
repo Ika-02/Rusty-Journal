@@ -1,11 +1,10 @@
-use chrono::{serde::ts_seconds, DateTime, Local, Utc};
-use serde::Serialize;
-use serde::Deserialize;
-use std::io::{Result, Seek, SeekFrom, Error, ErrorKind};
-use std::path::PathBuf;
-use std::fs::{File, OpenOptions};
-use std::fmt;
 use ansi_term::Colour::Green;
+use chrono::{serde::ts_seconds, DateTime, Local, Utc};
+use serde::{Serialize, Deserialize};
+use std::fmt;
+use std::fs::{File, OpenOptions};
+use std::io::{Error, ErrorKind, Result, Seek, SeekFrom};
+use std::path::PathBuf;
 
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -36,7 +35,6 @@ impl fmt::Display for Task {
     }
 }
 
-
 fn collect_tasks_from_file(mut file: &File) -> Result<Vec<Task>> {
     // Reset the cursor to the beginning of the file before reading.
     file.seek(SeekFrom::Start(0))?;
@@ -47,7 +45,7 @@ fn collect_tasks_from_file(mut file: &File) -> Result<Vec<Task>> {
         Err(e) if e.is_eof() => Vec::new(),
         Err(e) => Err(e)?,
     };
-    
+
     file.seek(SeekFrom::Start(0))?;
     Ok(tasks_list)
 }
@@ -82,17 +80,20 @@ pub fn remove_task(file_name: PathBuf, task_number: usize) -> Result<()> {
         .open(file_name)?;
 
     // Read the file and parse the tasks list into a vector.
-    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;    
+    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;
 
     // Remove the task from the vector or return an error if the task number is out of range.
     if task_number > tasks_list.len() || task_number == 0 {
-        return Err(Error::new(ErrorKind::InvalidInput, "Task number out of range"));
+        return Err(Error::new(
+            ErrorKind::InvalidInput,
+            "Task number out of range",
+        ));
     } else {
         tasks_list.remove(task_number - 1);
     };
 
     // Clear the file before writing to it -> or it will append to the file thus corrupting it.
-    file.set_len(0)?; 
+    file.set_len(0)?;
     // Write the updated tasks list to the file.
     serde_json::to_writer_pretty(file, &tasks_list)?;
     Ok(())
@@ -101,14 +102,13 @@ pub fn remove_task(file_name: PathBuf, task_number: usize) -> Result<()> {
 
 pub fn list_tasks(file_name: PathBuf) -> Result<()> {
     // Open file in read-only mode.
-    let file = OpenOptions::new()
-        .read(true)
-        .open(file_name)?;
+    let file = OpenOptions::new().read(true).open(file_name)?;
 
     // Read the file and parse the tasks list into a vector.
     let tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;
 
-    if tasks_list.is_empty() { // If the tasks list is empty, print a message.
+    if tasks_list.is_empty() {
+        // If the tasks list is empty, print a message.
         println!("No tasks in the list.");
     } else {
         // Loop through the tasks list and print each task.
@@ -134,11 +134,14 @@ pub fn complete_task(file_name: PathBuf, task_number: usize) -> Result<()> {
         .open(file_name)?;
 
     // Read the file and parse the tasks list into a vector.
-    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?; 
+    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;
 
     // Mark the task as done or return an error if the task number is out of range.
     if task_number > tasks_list.len() || task_number == 0 {
-        return Err(Error::new(ErrorKind::InvalidInput, "Task number out of list's range"));
+        return Err(Error::new(
+            ErrorKind::InvalidInput,
+            "Task number out of list's range",
+        ));
     } else {
         let mut task = tasks_list.remove(task_number - 1);
         if task.done {
@@ -151,7 +154,7 @@ pub fn complete_task(file_name: PathBuf, task_number: usize) -> Result<()> {
     };
 
     // Clear the file before writing to it -> or it will append to the file thus corrupting it.
-    file.set_len(0)?; 
+    file.set_len(0)?;
     // Write the updated tasks list to the file.
     serde_json::to_writer_pretty(file, &tasks_list)?;
     Ok(())
@@ -167,11 +170,18 @@ pub fn move_task(file_name: PathBuf, task_number: usize, new_position: usize) ->
         .open(file_name)?;
 
     // Read the file and parse the tasks list into a vector.
-    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;    
+    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;
 
     // Move the task to the new position in the vector or return an error if the task number or new position is out of range.
-    if new_position > tasks_list.len() || new_position == 0 || task_number > tasks_list.len() || task_number == 0 {
-        return Err(Error::new(ErrorKind::InvalidInput, "Index out of list's range"));
+    if new_position > tasks_list.len()
+        || new_position == 0
+        || task_number > tasks_list.len()
+        || task_number == 0
+    {
+        return Err(Error::new(
+            ErrorKind::InvalidInput,
+            "Index out of list's range",
+        ));
     } else {
         let still_undone_tasks = tasks_list.iter().filter(|task| !task.done).count();
         if new_position <= still_undone_tasks {
@@ -185,7 +195,7 @@ pub fn move_task(file_name: PathBuf, task_number: usize, new_position: usize) ->
     };
 
     // Clear the file before writing to it -> or it will append to the file thus corrupting it.
-    file.set_len(0)?; 
+    file.set_len(0)?;
     // Write the updated tasks list to the file.
     serde_json::to_writer_pretty(file, &tasks_list)?;
     Ok(())
@@ -201,11 +211,14 @@ pub fn modify_task(file_name: PathBuf, task_number: usize, title: String) -> Res
         .open(file_name)?;
 
     // Read the file and parse the tasks list into a vector.
-    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;  
+    let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;
 
     // Return an error if the task number is out of range.
     if task_number > tasks_list.len() || task_number == 0 {
-        return Err(Error::new(ErrorKind::InvalidInput, "Task number out of list's range"));
+        return Err(Error::new(
+            ErrorKind::InvalidInput,
+            "Task number out of list's range",
+        ));
     };
     // Modify the task's title if it's not done, otherwise print an error message.
     if !tasks_list[task_number - 1].done {
@@ -215,7 +228,7 @@ pub fn modify_task(file_name: PathBuf, task_number: usize, title: String) -> Res
     };
 
     // Clear the file before writing to it -> or it will append to the file thus corrupting it.
-    file.set_len(0)?; 
+    file.set_len(0)?;
     // Write the updated tasks list to the file.
     serde_json::to_writer_pretty(file, &tasks_list)?;
     Ok(())

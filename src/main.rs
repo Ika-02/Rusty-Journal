@@ -1,12 +1,10 @@
-mod cli;
-mod tasks;
-
 use std::path::PathBuf;
-use serde_json::error;
 use structopt::StructOpt;
 use anyhow::anyhow;
 use ansi_term::Colour::Red;
 
+mod cli;
+mod tasks;
 use cli::{Action::*, CliOptions};
 use tasks::Task;
 
