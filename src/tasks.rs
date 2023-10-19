@@ -1,4 +1,4 @@
-use ansi_term::Colour::Green;
+use ansi_term::Colour::{Green, Yellow , Blue};
 use chrono::{serde::ts_seconds, DateTime, Local, Utc};
 use serde::{Serialize, Deserialize};
 use std::fmt;
@@ -10,7 +10,7 @@ use std::path::PathBuf;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Task {
     pub title: String,
-
+    
     #[serde(with = "ts_seconds")]
     pub creation_date: DateTime<Utc>,
 
@@ -109,13 +109,14 @@ pub fn list_tasks(file_name: PathBuf) -> Result<()> {
 
     if tasks_list.is_empty() {
         // If the tasks list is empty, print a message.
-        println!("No tasks in the list.");
+        let message = Blue.bold().paint("Info:");
+        println!("{} {}", message, "No tasks in the list.");
     } else {
         // Loop through the tasks list and print each task.
         for (i, task) in tasks_list.iter().enumerate() {
             if task.done {
                 let done_task = format!("[{}|Done] {}", i + 1, task);
-                println!("{}", Green.paint(done_task));
+                println!("{}", Green.strikethrough().paint(done_task));
                 continue;
             }
             println!("[{}] {}", i + 1, task);
@@ -183,13 +184,17 @@ pub fn move_task(file_name: PathBuf, task_number: usize, new_position: usize) ->
             "Index out of list's range",
         ));
     } else {
+        let task = tasks_list.remove(task_number - 1);
         let still_undone_tasks = tasks_list.iter().filter(|task| !task.done).count();
-        if new_position <= still_undone_tasks {
-            let task = tasks_list.remove(task_number - 1);
+        if new_position <= still_undone_tasks && task.done {
             tasks_list.push(task);
-            println!("New position out of undone tasks' range, moving to the end of the list.")
+            let message = Yellow.bold().paint("Warning:");
+            println!("{} {}", message, "New position out of undone tasks' range, moving to the end of the list.");
+        } else if new_position > still_undone_tasks && !task.done {
+            tasks_list.insert(still_undone_tasks, task);
+            let message = Yellow.bold().paint("Warning:");
+            println!("{} {}", message, "New position in done tasks' range, moving to the end of the undone's list.");
         } else {
-            let task = tasks_list.remove(task_number - 1);
             tasks_list.insert(new_position - 1, task);
         }
     };
@@ -224,7 +229,8 @@ pub fn modify_task(file_name: PathBuf, task_number: usize, title: String) -> Res
     if !tasks_list[task_number - 1].done {
         tasks_list[task_number - 1].title = title;
     } else {
-        println!("Can't modify a completed task.")
+        let message = Yellow.bold().paint("Warning:");
+        println!("{} {}", message, "Can't modify a completed task.")
     };
 
     // Clear the file before writing to it -> or it will append to the file thus corrupting it.
