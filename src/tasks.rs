@@ -170,10 +170,8 @@ pub fn move_task(file_name: PathBuf, task_number: usize, new_position: usize) ->
     let mut tasks_list: Vec<Task> = collect_tasks_from_file(&file)?;    
 
     // Move the task to the new position in the vector or return an error if the task number or new position is out of range.
-    if new_position > tasks_list.len() || new_position == 0 {
-        return Err(Error::new(ErrorKind::InvalidInput, "New position out of list's range"));
-    } else if task_number > tasks_list.len() || task_number == 0 {
-        return Err(Error::new(ErrorKind::InvalidInput, "Task number out of list's range"));
+    if new_position > tasks_list.len() || new_position == 0 || task_number > tasks_list.len() || task_number == 0 {
+        return Err(Error::new(ErrorKind::InvalidInput, "Index out of list's range"));
     } else {
         let still_undone_tasks = tasks_list.iter().filter(|task| !task.done).count();
         if new_position <= still_undone_tasks {
