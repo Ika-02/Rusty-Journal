@@ -1,6 +1,6 @@
 # 🦀 Rusty Journal by Ioka
 
--> Small Rust project at the end of the **Azure Learning Rust course**.
+-> Small Rust project at the end of the **"[Take your first steps with Rust](https://learn.microsoft.com/training/paths/rust-first-steps/?WT.mc_id=portaledu_inproduct_learning)" Azure course**.
 
 ## ✅ What it can do:
 
@@ -13,3 +13,9 @@
 - Support of different list files
 - Have friendly error, warning and info messages
 - Also have a help subcommand
+
+## ℹ Information
+
+This little program is very unlikely to be updated as it was just a course project.
+
+(It may also be buggy 😅)
