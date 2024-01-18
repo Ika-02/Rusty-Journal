@@ -1,8 +1,8 @@
 # 🦀 Rusty Journal by Ioka
 
--> Small Rust project at the end of the **"[Take your first steps with Rust](https://learn.microsoft.com/training/paths/rust-first-steps/?WT.mc_id=portaledu_inproduct_learning)" Azure course**.
+> Small Rust project at the end of the **"[Take your first steps with Rust](https://learn.microsoft.com/training/paths/rust-first-steps/?WT.mc_id=portaledu_inproduct_learning)" Azure course**.
 
-## ✅ What it can do:
+## ✅ What it can do
 
 - Add new task to the list (create file if necessary)
 - Complete tasks
@@ -13,6 +13,10 @@
 - Support of different list files
 - Have friendly error, warning and info messages
 - Also have a help subcommand
+
+## 💻 Example
+
+![example image](https://github.com/Ika-02/Rusty-Journal/example.com)
 
 ## ℹ Information
 
