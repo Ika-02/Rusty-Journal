@@ -14,7 +14,7 @@
 - Have friendly error, warning and info messages
 - Also have a help subcommand
 
-![example image|500](https://github.com/Ika-02/Rusty-Journal/blob/main/example.png)
+<img src='https://github.com/Ika-02/Rusty-Journal/blob/main/example.png' width='500px'>
 
 ## ℹ Information
 
