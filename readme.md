@@ -14,7 +14,7 @@
 - Have friendly error, warning and info messages
 - Also have a help subcommand
 
-![example image](https://github.com/Ika-02/Rusty-Journal/example.png)
+![example image](https://github.com/Ika-02/Rusty-Journal/blob/main/example.png)
 
 ## ℹ Information
 
